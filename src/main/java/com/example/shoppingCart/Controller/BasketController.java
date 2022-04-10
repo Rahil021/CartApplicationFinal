@@ -12,8 +12,7 @@ import com.example.shoppingCart.Models.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.example.shoppingCart.Service.*;
 
 
@@ -34,19 +33,18 @@ public class BasketController {
     @Autowired
     ProductRepository productRepository;
 
-    @GetMapping("/products")
-    public ResponseEntity<Object> getProducts(){
-
-        List<Product> result = shoppingcartservice.showAllProducts();
-
-       // ResponseEntity res =  new ResponseEntity<ApiResponse>(new ApiResponse(true, "product has been added",map), HttpStatus.CREATED);
-        return ApiResponse.generateResponse("Successfully added data!", HttpStatus.OK, result);
-    }
+//    @GetMapping("/products")
+//    public ResponseEntity<Object> getProducts(){
+//
+//        List<Product> result = shoppingcartservice.showAllProducts();
+//
+//       // ResponseEntity res =  new ResponseEntity<ApiResponse>(new ApiResponse(true, "product has been added",map), HttpStatus.CREATED);
+//        return ApiResponse.generateResponse("Successfully added data!", HttpStatus.OK, result);
+//    }
 
     @GetMapping("/basket")
     public ResponseEntity<Object> getCartItems() {
         List<Basket> result = shoppingcartservice.showBasket();
-
         return ApiResponse.generateResponse("success", HttpStatus.OK, result);
     }
 
@@ -68,15 +66,16 @@ public class BasketController {
 
         List<nProductDetails> productDetails = new ArrayList<>();
         nProductDetails details = new nProductDetails();
+        nProductDetails details1 = new nProductDetails();
         details.setProduct_id("11");
         details.setProduct_quantity(10);
 
         productDetails.add(details); //1
 
-        details.setProduct_id("21");
-        details.setProduct_quantity(10);
+        details1.setProduct_id("21");
+        details1.setProduct_quantity(20);
 
-        productDetails.add(details);
+        productDetails.add(details1);
 
         products.setProducts(productDetails); //2
 
@@ -89,4 +88,30 @@ public class BasketController {
         return list;
     }
 
+    @GetMapping("/basket/{basket_id}")
+    public ResponseEntity<Object> getBasketItemsById(@PathVariable String basket_id){
+        return null;
+    }
+
+    @PostMapping("/basket")  // creates a empty basket
+    public ResponseEntity<Object> createBasket(){
+        return null;
+    }
+
+    @PostMapping("/basket/addProduct")
+    public ResponseEntity<Object> addProductToBasket() //add request body -- pending
+    {
+        return null;
+    }
+
+    @PutMapping("/basket")
+    public ResponseEntity<Object> updateBasket() //add request body -- pending
+    {
+        return null;
+    }
+
+    @DeleteMapping("/basket/{basket_id}")
+    public ResponseEntity<Object> deleteBasket(@PathVariable String basket_id){
+        return null;
+    }
 }
