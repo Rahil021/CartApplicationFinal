@@ -1,21 +1,19 @@
-package com.example.shoppingCart.Models;
+package com.example.shoppingCart.Models.BasketSubModel;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Embedded;
 
 @Embeddable
 @AllArgsConstructor
 @Data
 @NoArgsConstructor
-public class productinfo {
+public class productShell {
 
-    public Integer product_id;
-
-    public Integer quantity;
-
+    @Embedded
+    private ProductInfo products;
 
 }

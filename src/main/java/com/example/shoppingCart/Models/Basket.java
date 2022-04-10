@@ -1,5 +1,6 @@
 package com.example.shoppingCart.Models;
 
+import com.example.shoppingCart.Models.BasketSubModel.productShell;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,7 @@ public class Basket {
     public String id;
 
     @Embedded
-    public productinfo attributes;
+    public productShell attributes;
 //    @Column(name = "product_id")
 //    public String product_id;
 //
