@@ -7,12 +7,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.*;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Entity
 public class nBasketInfo {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("id")
     private Integer id = null;
 
@@ -45,8 +50,13 @@ public class nBasketInfo {
     @JsonProperty("type")
     private nBasketInfo.TypeEnum type = null;
 
+//    @JsonProperty("attributes")
+//    private nProducts products = null;
+
+    @ManyToOne
+  //  @JoinColumn(name = "details_product_id")
     @JsonProperty("attributes")
-    private nProducts products = null;
+    private nProductDetails details;
 
 }
 

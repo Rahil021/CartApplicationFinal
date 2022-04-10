@@ -5,6 +5,8 @@ import com.example.shoppingCart.newModels.BasketData;
 import com.example.shoppingCart.newModels.nBasketInfo;
 import com.example.shoppingCart.newModels.nProductDetails;
 import com.example.shoppingCart.newModels.nProducts;
+import com.example.shoppingCart.newRepo.BasketInfoRepo;
+import com.example.shoppingCart.newRepo.ProductDetailsRepo;
 import com.example.shoppingCart.repo.BasketRepository;
 import com.example.shoppingCart.repo.ProductRepository;
 import com.example.shoppingCart.Models.Basket;
@@ -33,6 +35,12 @@ public class BasketController {
     @Autowired
     ProductRepository productRepository;
 
+    @Autowired
+    BasketInfoRepo basketInfoRepo;
+
+    @Autowired
+    ProductDetailsRepo productDetailsRepo;
+
 //    @GetMapping("/products")
 //    public ResponseEntity<Object> getProducts(){
 //
@@ -49,43 +57,55 @@ public class BasketController {
     }
 
     @GetMapping("/basket/v2")
-    public List<BasketData> getBaskets2(){
+    public List<nBasketInfo> getBaskets2(){
 
-        List<BasketData> list = new ArrayList<>();
-
-        BasketData data = new BasketData();
-        // data.setData(); //4
-
-        nBasketInfo basketInfo = new nBasketInfo();
-        basketInfo.setId(1);
-        basketInfo.setType(nBasketInfo.TypeEnum.BASKET);
+//        List<BasketData> list = new ArrayList<>();
+//
+//        BasketData data = new BasketData();
+//        // data.setData(); //4
+//
+//        nBasketInfo basketInfo = new nBasketInfo();
+//        basketInfo.setId(1);
+//        basketInfo.setType(nBasketInfo.TypeEnum.BASKET);
         //  basketInfo.setProducts();  //3
 
+//        nProducts products = new nProducts();
+//        //     products.setProducts(); //2
+
+//        List<nProductDetails> productDetails = new ArrayList<>();
+//        nProductDetails details = new nProductDetails();
+//        nProductDetails details1 = new nProductDetails();
+//        details.setProduct_id("11");
+//        details.setProduct_quantity(10);
+//
+//        productDetails.add(details); //1
+//
+//        details1.setProduct_id("21");
+//        details1.setProduct_quantity(20);
+//
+//        productDetails.add(details1);
+//
+//        products.setProducts(productDetails); //2
+
+     //   basketInfo.setProducts(products); //3
+
+        List<nBasketInfo> basketInfos = new ArrayList<>();
+        basketInfos = basketInfoRepo.findAll();
+
+//        BasketData data = new BasketData();
+//        data.setData(basketInfos);
+
+        List<nProductDetails> productDetailsList = new ArrayList<>();
+        productDetailsList = productDetailsRepo.findAll();
+
         nProducts products = new nProducts();
-        //     products.setProducts(); //2
+        products.setProducts(productDetailsList);
 
-        List<nProductDetails> productDetails = new ArrayList<>();
-        nProductDetails details = new nProductDetails();
-        nProductDetails details1 = new nProductDetails();
-        details.setProduct_id("11");
-        details.setProduct_quantity(10);
+//        data.setData(basketInfo); //1
+//
+//        list.add(data);
 
-        productDetails.add(details); //1
-
-        details1.setProduct_id("21");
-        details1.setProduct_quantity(20);
-
-        productDetails.add(details1);
-
-        products.setProducts(productDetails); //2
-
-        basketInfo.setProducts(products); //3
-
-        data.setData(basketInfo); //1
-
-        list.add(data);
-
-        return list;
+        return basketInfos;
     }
 
     @GetMapping("/basket/{basket_id}")

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
@@ -12,8 +13,10 @@ import javax.persistence.Embeddable;
 @NoArgsConstructor
 public class ProductInfo {
 
+    @Column(name = "product_id")
     public Integer product_id;
 
+    @Column(name = "quantity")
     public Integer quantity;
 
 
