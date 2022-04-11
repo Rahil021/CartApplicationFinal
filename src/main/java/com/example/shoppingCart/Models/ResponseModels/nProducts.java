@@ -1,11 +1,11 @@
-package com.example.shoppingCart.newModels;
+package com.example.shoppingCart.Models.ResponseModels;
 
+import com.example.shoppingCart.Models.Database.ProductDetails;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Embeddable;
 import java.util.List;
 
 @AllArgsConstructor
@@ -14,6 +14,6 @@ import java.util.List;
 public class nProducts {
 
     @JsonProperty("products")
-    private List<nProductDetails> products;
+    private List<ProductDetails> products;
 
 }

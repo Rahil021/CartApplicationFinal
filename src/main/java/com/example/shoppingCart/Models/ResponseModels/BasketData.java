@@ -1,9 +1,11 @@
-package com.example.shoppingCart.newModels;
+package com.example.shoppingCart.Models.ResponseModels;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -11,6 +13,5 @@ import lombok.NoArgsConstructor;
 public class BasketData {
 
     @JsonProperty("data")
-    private nBasketInfo data = null;
-
+    private List<BasketInfoResponse> data = null;
 }

@@ -1,4 +1,4 @@
-package com.example.shoppingCart.newModels;
+package com.example.shoppingCart.Models.Database;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,13 +8,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Entity
-public class nBasketInfo {
+@Table(name = "Cart")
+public class BasketInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,15 +51,11 @@ public class nBasketInfo {
     }
 
     @JsonProperty("type")
-    private nBasketInfo.TypeEnum type = null;
+    private BasketInfo.TypeEnum type = null;
 
-//    @JsonProperty("attributes")
-//    private nProducts products = null;
-
-    @ManyToOne
-  //  @JoinColumn(name = "details_product_id")
     @JsonProperty("attributes")
-    private nProductDetails details;
+    @OneToMany(targetEntity = ProductDetails.class, cascade = CascadeType.ALL)
+    @JoinColumn(name = "cart_id" , referencedColumnName = "id")
+    List<ProductDetails> list = new ArrayList<>();
 
 }
-
