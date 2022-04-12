@@ -1,5 +1,6 @@
 package com.example.shoppingCart.Models.ResponseModels;
 
+import com.example.shoppingCart.Models.RequestModel.Customer;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -17,8 +18,6 @@ import javax.persistence.Id;
 @AllArgsConstructor
 public class BasketInfoResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("id")
     private Integer id = null;
 
@@ -53,4 +52,5 @@ public class BasketInfoResponse {
 
     @JsonProperty("attributes")
     private nProducts products;
+
 }

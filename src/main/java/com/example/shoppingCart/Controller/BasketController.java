@@ -1,9 +1,10 @@
 package com.example.shoppingCart.Controller;
 
 import com.example.shoppingCart.Models.Database.ProductDetails;
-import com.example.shoppingCart.Models.ResponseModels.BasketData;
-import com.example.shoppingCart.Models.ResponseModels.BasketInfoResponse;
-import com.example.shoppingCart.Models.ResponseModels.EmptyBasket;
+import com.example.shoppingCart.Models.RequestModel.Customer;
+import com.example.shoppingCart.Models.ResponseModels.*;
+import com.example.shoppingCart.Models.ResponseModels.Relationship.BasketDataForRelationShip;
+import com.example.shoppingCart.Models.ResponseModels.Relationship.BasketInfoResponseWithRelationship;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.example.shoppingCart.Service.*;
@@ -52,7 +53,8 @@ public class BasketController {
 
     //update product quantity in basket
     @PutMapping("/basket/{basketId}/product/{productId}")
-    public BasketData updateQuantity(@PathVariable Integer basketId,@PathVariable Integer productId, @RequestBody ProductDetails product){
+    public BasketData updateQuantity(@PathVariable Integer basketId,
+                                     @PathVariable Integer productId, @RequestBody ProductDetails product){
 
         shoppingcartservice.updateQuantity(basketId,productId,product);
 
@@ -66,21 +68,33 @@ public class BasketController {
     }
 
     //submit basket
-    @PostMapping("basket/submitBasket/{basketId}")
-    public BasketData submitBasket(@PathVariable Integer basketId){
+    @PostMapping("basket/submitBasket/{basketId}") //change to post
+    public BasketDataForRelationShip submitBasket(@PathVariable Integer basketId){
 
         //call stock update api and update stock_quantity
 
-        return null;
+        List<BasketInfoResponseWithRelationship> list = new ArrayList<>();
+        list = shoppingcartservice.submitBasket(basketId);
+
+        BasketDataForRelationShip data = new BasketDataForRelationShip();
+        data.setData(list);
+
+        return data;
     }
 
     //Associate basket with customer
     @PutMapping("basket/{basketId}/customer")
-    public BasketData associateBasketWithCustomer(@PathVariable Integer basket_id){
+    public BasketData associateBasketWithCustomer(@PathVariable Integer basketId, @RequestBody Customer customer){
 
-        //return in basketdata + additional relationship parameter(using ResponseEntity)
+        shoppingcartservice.associateBasketWithCustomer(basketId,customer);
 
-        return null;
+        List<BasketInfoResponse> list = new ArrayList<>();
+        list = shoppingcartservice.getBasketItemsById(basketId);
+
+        BasketData data = new BasketData();
+        data.setData(list);
+
+        return data;
     }
 }
 

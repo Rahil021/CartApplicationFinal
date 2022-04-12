@@ -1,6 +1,7 @@
 package com.example.shoppingCart.Models.Database;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
@@ -57,5 +58,9 @@ public class BasketInfo {
     @OneToMany(targetEntity = ProductDetails.class, cascade = CascadeType.ALL)
     @JoinColumn(name = "cart_id" , referencedColumnName = "id")
     List<ProductDetails> list = new ArrayList<>();
+
+    @JsonIgnore
+    private Integer customerId = null;
+
 
 }

@@ -10,5 +10,4 @@ public class EmptyBasket {
 
     private Integer id;
     private String type;
-
 }

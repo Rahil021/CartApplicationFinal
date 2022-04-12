@@ -3,16 +3,17 @@ package com.example.shoppingCart.Service;
 import com.example.shoppingCart.ExceptionHandling.InvalidCartIdException;
 import com.example.shoppingCart.Models.Database.BasketInfo;
 import com.example.shoppingCart.Models.Database.ProductDetails;
+import com.example.shoppingCart.Models.RequestModel.Customer;
 import com.example.shoppingCart.Models.ResponseModels.BasketInfoResponse;
+import com.example.shoppingCart.Models.ResponseModels.Relationship.BasketInfoResponseWithRelationship;
 import com.example.shoppingCart.Models.ResponseModels.EmptyBasket;
+import com.example.shoppingCart.Models.ResponseModels.Relationship.CustomerShell;
 import com.example.shoppingCart.Models.ResponseModels.nProducts;
 import com.example.shoppingCart.repo.BasketInfoRepo;
 import com.example.shoppingCart.repo.ProductDetailsRepo;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,16 +115,83 @@ public class Shoppingcartservice {
 
     }
 
-}
+    public void associateBasketWithCustomer(Integer basketId, Customer customer){
 
-/*
+        List<BasketInfo> list = basketInfoRepo.findAll();
+        List<BasketInfoResponse> output = new ArrayList<>();
+        Boolean flag = false;
 
- for (nBasketInfo item : list){
+        for(BasketInfo item : list){
             if(item.getId().equals(basketId)){
-                output.add(item);
+
+                if(item.getCustomerId() == null){
+
+                    BasketInfo response = new BasketInfo();
+                    response.setId(item.getId());
+                    response.setType(item.getType());
+                    response.setList(item.getList());
+                    response.setCustomerId(customer.getCustomerId());
+
+                    //basketInfoRepo.delete(item);
+                    basketInfoRepo.save(response);
+
+                    flag = true;
+                    break;
+
+                }else{
+                    //throw new Customer Already Associated Exception
+                }
+
+            }
+        }
+
+        if(!flag){
+            //throw cart id not found exception
+        }
+
+    }
+
+    @SneakyThrows
+    public List<BasketInfoResponseWithRelationship> submitBasket(Integer basketId){
+
+        List<BasketInfo> list = basketInfoRepo.findAll();
+
+        List<BasketInfoResponseWithRelationship> output = new ArrayList<>();
+
+        boolean flag = false;
+
+        for (BasketInfo item : list){
+            if(item.getId().equals(basketId)){
+
+                BasketInfoResponseWithRelationship response = new BasketInfoResponseWithRelationship();
+                response.setId(item.getId());
+                response.setType(BasketInfoResponse.TypeEnum.BASKET);
+
+                nProducts products = new nProducts();
+                products.setProducts(item.getList());
+
+                response.setProducts(products);
+
+                Customer customer = new Customer();
+                customer.setCustomerId(item.getCustomerId());
+
+                CustomerShell customerShell = new CustomerShell();
+                customerShell.setCustomer(customer);
+
+                response.setCustomerShell(customerShell);
+
+                output.add(response);
                 flag = true;
                 break;
             }
         }
 
- */
+        if(!flag){
+            throw new InvalidCartIdException();
+        }else{
+            return output;
+        }
+
+    }
+
+}
