@@ -61,6 +61,8 @@ public class BasketInfo {
 
     @JsonIgnore
     private Integer customerId = null;
-
+    
+    @JsonIgnore
+    private Integer status = 1;
 
 }

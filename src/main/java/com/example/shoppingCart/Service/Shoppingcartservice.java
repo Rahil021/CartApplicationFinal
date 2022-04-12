@@ -76,14 +76,25 @@ public class Shoppingcartservice {
 
     public void addProductToBasket(Integer basketId, ProductDetails details){
 
-        ProductDetails productDetails = new ProductDetails();
+        List<BasketInfo> list = basketInfoRepo.findAll();
 
-        productDetails.setProduct_id(details.getProduct_id());
-        productDetails.setProduct_quantity(details.getProduct_quantity());
-        productDetails.setCart_id(basketId);
+        for (BasketInfo item : list){
+            if(item.getId().equals(basketId)){
+                if(item.getStatus() == 1){
+                    ProductDetails productDetails = new ProductDetails();
 
-        productDetailsRepo.save(productDetails);
+                    productDetails.setProduct_id(details.getProduct_id());
+                    productDetails.setProduct_quantity(details.getProduct_quantity());
+                    productDetails.setCart_id(basketId);
 
+                    productDetailsRepo.save(productDetails);
+                }else{
+                    // Basket already submitted exception
+                }
+            }else {
+                // basket id not found exception
+            }
+        }
     }
 
     public void updateQuantity(Integer basketId, Integer productId, ProductDetails product){
@@ -179,6 +190,9 @@ public class Shoppingcartservice {
                 customerShell.setCustomer(customer);
 
                 response.setCustomerShell(customerShell);
+
+                item.setStatus(0); //1 - active, 0 - completed
+                basketInfoRepo.save(item);
 
                 output.add(response);
                 flag = true;
