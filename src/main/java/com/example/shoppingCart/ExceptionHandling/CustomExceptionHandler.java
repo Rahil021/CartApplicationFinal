@@ -83,5 +83,18 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
+    @ExceptionHandler({CustomerNotAssocException.class})
+    ResponseEntity<?> CustomerNotAssocException(Exception e, ServletWebRequest request){
+        APIError apiError = new APIError();
+        apiError.setStatus(HttpStatus.BAD_REQUEST);
+        apiError.setCode("400");
+        apiError.setTitle(e.getMessage());
+        ErrorSource es = new ErrorSource();
+        es.setParameter("Customer");
+        es.setPointer("N/A");
+        apiError.setSource(es);
+        return new ResponseEntity(apiError, new HttpHeaders(), apiError.getStatus());
+    }
+
 
 }

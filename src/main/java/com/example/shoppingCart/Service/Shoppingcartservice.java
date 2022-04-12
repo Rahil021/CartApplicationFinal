@@ -1,9 +1,6 @@
 package com.example.shoppingCart.Service;
 
-import com.example.shoppingCart.ExceptionHandling.AlreadySubmittedException;
-import com.example.shoppingCart.ExceptionHandling.CustomerAlreadyAssocException;
-import com.example.shoppingCart.ExceptionHandling.InvalidCartIdException;
-import com.example.shoppingCart.ExceptionHandling.InvalidProductIdException;
+import com.example.shoppingCart.ExceptionHandling.*;
 import com.example.shoppingCart.Models.Database.BasketInfo;
 import com.example.shoppingCart.Models.Database.ProductDetails;
 import com.example.shoppingCart.Models.RequestModel.Customer;
@@ -80,35 +77,45 @@ public class Shoppingcartservice {
     public void addProductToBasket(Integer basketId, ProductDetails details) throws InvalidCartIdException, AlreadySubmittedException {
 
         List<BasketInfo> list = basketInfoRepo.findAll();
+        Boolean flag = false;
 
         for (BasketInfo item : list){
-            if(item.getId().equals(basketId)){
-                if(item.getStatus() == 1){
-                    ProductDetails productDetails = new ProductDetails();
 
+            if(item.getId().equals(basketId)){
+
+                if(item.getStatus() == 1){
+
+                    ProductDetails productDetails = new ProductDetails();
                     productDetails.setProduct_id(details.getProduct_id());
                     productDetails.setProduct_quantity(details.getProduct_quantity());
                     productDetails.setCart_id(basketId);
-
+                    flag = true;
                     productDetailsRepo.save(productDetails);
                     break;
+
                 }else{
-                    // Basket already submitted exception
                     throw new AlreadySubmittedException();
                 }
-            }else {
-                // basket id not found exception
-                throw new InvalidCartIdException();
+
             }
         }
+
+        if(!flag)
+            throw new InvalidCartIdException();
+
     }
 
     public void updateQuantity(Integer basketId, ProductDetails product) throws InvalidCartIdException, InvalidProductIdException, AlreadySubmittedException {
 
         List<BasketInfo> list = basketInfoRepo.findAll();
+        Boolean flagBasket = false;
+        Boolean flagProduct = false;
 
         for (BasketInfo item : list){
             if(item.getId().equals(basketId)){
+
+                flagBasket = true;
+
                 if(item.getStatus() == 1){
 
                     List<ProductDetails> cartProductsAll = productDetailsRepo.findAll();
@@ -131,9 +138,8 @@ public class Shoppingcartservice {
                             productDetailsRepo.delete(s);
                             productDetailsRepo.save(updatedProduct);
 
-                        }else{
-                            //product not found in cart exception
-                            throw new InvalidProductIdException();
+                            flagProduct = true;
+
                         }
                     }
 
@@ -141,11 +147,13 @@ public class Shoppingcartservice {
                     // Basket already submitted exception
                     throw new AlreadySubmittedException();
                 }
-            }else{
-                // basket id not found exception
-                throw new InvalidCartIdException();
             }
         }
+
+        if(!flagBasket)
+            throw new InvalidCartIdException();
+        else if(!flagProduct)
+            throw new InvalidProductIdException();
 
     }
 
@@ -184,8 +192,6 @@ public class Shoppingcartservice {
                     throw new AlreadySubmittedException();
                 }
 
-
-
             }
         }
 
@@ -196,56 +202,65 @@ public class Shoppingcartservice {
 
     }
 
-    public List<BasketInfoResponseWithRelationship> submitBasket(Integer basketId) throws AlreadySubmittedException, InvalidCartIdException {
+    public List<BasketInfoResponseWithRelationship> submitBasket(Integer basketId) throws AlreadySubmittedException, InvalidCartIdException, CustomerNotAssocException {
 
         List<BasketInfo> list = basketInfoRepo.findAll();
 
         List<BasketInfoResponseWithRelationship> output = new ArrayList<>();
 
         boolean flag = false;
+        boolean customerAssociated = false;
 
         for (BasketInfo item : list){
             if(item.getId().equals(basketId)){
 
-                if(item.getStatus() == 1){
+                if(item.getCustomerId() != null){
 
-                    BasketInfoResponseWithRelationship response = new BasketInfoResponseWithRelationship();
-                    response.setId(item.getId());
-                    response.setType(BasketInfoResponse.TypeEnum.BASKET);
+                    customerAssociated = true;
 
-                    nProducts products = new nProducts();
-                    products.setProducts(item.getList());
+                    if(item.getStatus() == 1){
 
-                    response.setProducts(products);
+                        BasketInfoResponseWithRelationship response = new BasketInfoResponseWithRelationship();
+                        response.setId(item.getId());
+                        response.setType(BasketInfoResponse.TypeEnum.BASKET);
 
-                    Customer customer = new Customer();
-                    customer.setCustomerId(item.getCustomerId());
+                        nProducts products = new nProducts();
+                        products.setProducts(item.getList());
 
-                    CustomerShell customerShell = new CustomerShell();
-                    customerShell.setCustomer(customer);
+                        response.setProducts(products);
 
-                    response.setCustomerShell(customerShell);
+                        Customer customer = new Customer();
+                        customer.setCustomerId(item.getCustomerId());
 
-                    item.setStatus(0); //1 - active, 0 - completed
-                    basketInfoRepo.save(item);
+                        CustomerShell customerShell = new CustomerShell();
+                        customerShell.setCustomer(customer);
 
-                    output.add(response);
-                    flag = true;
-                    break;
+                        response.setCustomerShell(customerShell);
 
-                }else{
-                    // Basket already submitted exception
-                    throw new AlreadySubmittedException();
+                        item.setStatus(0); //1 - active, 0 - completed
+                        basketInfoRepo.save(item);
+
+                        output.add(response);
+                        flag = true;
+                        break;
+
+                    }else{
+                        // Basket already submitted exception
+                        throw new AlreadySubmittedException();
+                    }
+
                 }
 
             }
         }
 
-        if(!flag){
+        if(!flag)
             throw new InvalidCartIdException();
-        }else{
+        else if (!customerAssociated)
+            throw new CustomerNotAssocException();
+        else
             return output;
-        }
+
 
     }
 

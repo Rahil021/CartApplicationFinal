@@ -1,9 +1,6 @@
 package com.example.shoppingCart.Controller;
 
-import com.example.shoppingCart.ExceptionHandling.AlreadySubmittedException;
-import com.example.shoppingCart.ExceptionHandling.CustomerAlreadyAssocException;
-import com.example.shoppingCart.ExceptionHandling.InvalidCartIdException;
-import com.example.shoppingCart.ExceptionHandling.InvalidProductIdException;
+import com.example.shoppingCart.ExceptionHandling.*;
 import com.example.shoppingCart.Models.Database.ProductDetails;
 import com.example.shoppingCart.Models.RequestModel.Customer;
 import com.example.shoppingCart.Models.ResponseModels.*;
@@ -72,7 +69,7 @@ public class BasketController {
 
     //submit basket
     @PostMapping("basket/submitBasket/{basketId}") //change to post
-    public BasketDataForRelationShip submitBasket(@PathVariable Integer basketId) throws AlreadySubmittedException, InvalidCartIdException {
+    public BasketDataForRelationShip submitBasket(@PathVariable Integer basketId) throws AlreadySubmittedException, InvalidCartIdException, CustomerNotAssocException {
 
         //call stock update api and update stock_quantity
 
