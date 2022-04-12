@@ -52,11 +52,10 @@ public class BasketController {
     }
 
     //update product quantity in basket
-    @PutMapping("/basket/{basketId}/product/{productId}")
-    public BasketData updateQuantity(@PathVariable Integer basketId,
-                                     @PathVariable Integer productId, @RequestBody ProductDetails product){
+    @PutMapping("/basket/{basketId}/product")
+    public BasketData updateQuantity(@PathVariable Integer basketId, @RequestBody ProductDetails product){
 
-        shoppingcartservice.updateQuantity(basketId,productId,product);
+        shoppingcartservice.updateQuantity(basketId,product);
 
         List<BasketInfoResponse> list = new ArrayList<>();
         list = shoppingcartservice.getBasketItemsById(basketId);

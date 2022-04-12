@@ -98,7 +98,7 @@ public class Shoppingcartservice {
         }
     }
 
-    public void updateQuantity(Integer basketId, Integer productId, ProductDetails product){
+    public void updateQuantity(Integer basketId, ProductDetails product){
 
         List<BasketInfo> list = basketInfoRepo.findAll();
 
@@ -116,7 +116,7 @@ public class Shoppingcartservice {
                     }
 
                     for(ProductDetails s: sortByCartId){
-                        if(s.getProduct_id().equals(productId)){
+                        if(s.getProduct_id().equals(product.getProduct_id())){
 
                             ProductDetails updatedProduct = new ProductDetails();
                             updatedProduct.setProduct_id(s.getProduct_id());
