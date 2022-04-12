@@ -1,6 +1,8 @@
 package com.example.shoppingCart.Service;
 
+import com.example.shoppingCart.ExceptionHandling.CustomerAlreadyAssocException;
 import com.example.shoppingCart.ExceptionHandling.InvalidCartIdException;
+import com.example.shoppingCart.ExceptionHandling.InvalidProductIdException;
 import com.example.shoppingCart.Models.Database.BasketInfo;
 import com.example.shoppingCart.Models.Database.ProductDetails;
 import com.example.shoppingCart.Models.RequestModel.Customer;
@@ -41,8 +43,7 @@ public class Shoppingcartservice {
 
     }
 
-    @SneakyThrows
-    public List<BasketInfoResponse> getBasketItemsById(Integer basketId){
+    public List<BasketInfoResponse> getBasketItemsById(Integer basketId) throws InvalidCartIdException {
 
         List<BasketInfo> list = basketInfoRepo.findAll();
 
@@ -74,7 +75,7 @@ public class Shoppingcartservice {
         }
     }
 
-    public void addProductToBasket(Integer basketId, ProductDetails details){
+    public void addProductToBasket(Integer basketId, ProductDetails details) throws InvalidCartIdException{
 
         List<BasketInfo> list = basketInfoRepo.findAll();
 
@@ -94,11 +95,12 @@ public class Shoppingcartservice {
                 }
             }else {
                 // basket id not found exception
+                throw new InvalidCartIdException();
             }
         }
     }
 
-    public void updateQuantity(Integer basketId, ProductDetails product){
+    public void updateQuantity(Integer basketId, ProductDetails product) throws InvalidCartIdException, InvalidProductIdException {
 
         List<BasketInfo> list = basketInfoRepo.findAll();
 
@@ -128,20 +130,23 @@ public class Shoppingcartservice {
 
                         }else{
                             //product not found in cart exception
+                            throw new InvalidProductIdException();
                         }
                     }
 
                 }else{
                     // Basket already submitted exception
+
                 }
             }else{
                 // basket id not found exception
+                throw new InvalidCartIdException();
             }
         }
 
     }
 
-    public void associateBasketWithCustomer(Integer basketId, Customer customer){
+    public void associateBasketWithCustomer(Integer basketId, Customer customer) throws InvalidCartIdException, CustomerAlreadyAssocException {
 
         List<BasketInfo> list = basketInfoRepo.findAll();
         List<BasketInfoResponse> output = new ArrayList<>();
@@ -166,6 +171,7 @@ public class Shoppingcartservice {
 
                 }else{
                     //throw new Customer Already Associated Exception
+                    throw new CustomerAlreadyAssocException();
                 }
 
             }
@@ -173,6 +179,7 @@ public class Shoppingcartservice {
 
         if(!flag){
             //throw cart id not found exception
+            throw new InvalidCartIdException();
         }
 
     }

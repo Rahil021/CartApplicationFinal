@@ -1,5 +1,8 @@
 package com.example.shoppingCart.Controller;
 
+import com.example.shoppingCart.ExceptionHandling.CustomerAlreadyAssocException;
+import com.example.shoppingCart.ExceptionHandling.InvalidCartIdException;
+import com.example.shoppingCart.ExceptionHandling.InvalidProductIdException;
 import com.example.shoppingCart.Models.Database.ProductDetails;
 import com.example.shoppingCart.Models.RequestModel.Customer;
 import com.example.shoppingCart.Models.ResponseModels.*;
@@ -26,7 +29,7 @@ public class BasketController {
 
     // Get items from basket by id
     @GetMapping("/basket/{basketId}")
-    public BasketData getBasketItemsById(@PathVariable Integer basketId){
+    public BasketData getBasketItemsById(@PathVariable Integer basketId) throws InvalidCartIdException {
 
         List<BasketInfoResponse> list = new ArrayList<>();
         list = shoppingcartservice.getBasketItemsById(basketId);
@@ -39,7 +42,7 @@ public class BasketController {
 
     //add product to basket
     @PostMapping("/basket/{basketId}/product")
-    public BasketData addProductToBasket(@PathVariable Integer basketId, @RequestBody ProductDetails productDetails){
+    public BasketData addProductToBasket(@PathVariable Integer basketId, @RequestBody ProductDetails productDetails) throws InvalidCartIdException {
 
         shoppingcartservice.addProductToBasket(basketId,productDetails);
         List<BasketInfoResponse> list = new ArrayList<>();
@@ -53,7 +56,7 @@ public class BasketController {
 
     //update product quantity in basket
     @PutMapping("/basket/{basketId}/product")
-    public BasketData updateQuantity(@PathVariable Integer basketId, @RequestBody ProductDetails product){
+    public BasketData updateQuantity(@PathVariable Integer basketId, @RequestBody ProductDetails product) throws InvalidCartIdException, InvalidProductIdException {
 
         shoppingcartservice.updateQuantity(basketId,product);
 
@@ -83,7 +86,7 @@ public class BasketController {
 
     //Associate basket with customer
     @PutMapping("basket/{basketId}/customer")
-    public BasketData associateBasketWithCustomer(@PathVariable Integer basketId, @RequestBody Customer customer){
+    public BasketData associateBasketWithCustomer(@PathVariable Integer basketId, @RequestBody Customer customer) throws InvalidCartIdException, CustomerAlreadyAssocException {
 
         shoppingcartservice.associateBasketWithCustomer(basketId,customer);
 
