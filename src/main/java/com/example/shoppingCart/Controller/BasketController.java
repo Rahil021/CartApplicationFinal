@@ -17,13 +17,13 @@ public class BasketController {
     @Autowired
     Shoppingcartservice shoppingcartservice;
 
-    // creates an empty basket
+    // creates a new empty basket
     @PostMapping("/basket")
     public EmptyBasket createBasket(){
         return shoppingcartservice.createBasket();
     }
 
-    // Get items from basket
+    // Get items from basket by id
     @GetMapping("/basket/{basketId}")
     public BasketData getBasketItemsById(@PathVariable Integer basketId){
 
@@ -65,5 +65,22 @@ public class BasketController {
         return data;
     }
 
+    //submit basket
+    @PostMapping("basket/submitBasket/{basketId}")
+    public BasketData submitBasket(@PathVariable Integer basketId){
+
+        //call stock update api and update stock_quantity
+
+        return null;
+    }
+
+    //Associate basket with customer
+    @PutMapping("basket/{basketId}/customer")
+    public BasketData associateBasketWithCustomer(@PathVariable Integer basket_id){
+
+        //return in basketdata + additional relationship parameter(using ResponseEntity)
+
+        return null;
+    }
 }
 

@@ -87,6 +87,31 @@ public class Shoppingcartservice {
 
     public void updateQuantity(Integer basketId, Integer productId, ProductDetails product){
 
+        List<ProductDetails> cartProductsAll = productDetailsRepo.findAll();
+        List<ProductDetails> sortByCartId = new ArrayList<>();
+
+        for(ProductDetails item: cartProductsAll){
+            if(item.getCart_id().equals(basketId)){
+                sortByCartId.add(item);
+            }
+        }
+
+        for(ProductDetails s: sortByCartId){
+            if(s.getProduct_id().equals(productId)){
+
+                ProductDetails updatedProduct = new ProductDetails();
+                updatedProduct.setProduct_id(s.getProduct_id());
+                updatedProduct.setProduct_quantity(product.getProduct_quantity());
+                updatedProduct.setCart_id(s.getCart_id());
+
+                productDetailsRepo.delete(s);
+                productDetailsRepo.save(updatedProduct);
+
+            }else{
+                //product not found in cart exception
+            }
+        }
+
     }
 
 }
