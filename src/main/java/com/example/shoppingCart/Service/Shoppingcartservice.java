@@ -88,6 +88,7 @@ public class Shoppingcartservice {
                     productDetails.setCart_id(basketId);
 
                     productDetailsRepo.save(productDetails);
+                    break;
                 }else{
                     // Basket already submitted exception
                 }
@@ -99,28 +100,42 @@ public class Shoppingcartservice {
 
     public void updateQuantity(Integer basketId, Integer productId, ProductDetails product){
 
-        List<ProductDetails> cartProductsAll = productDetailsRepo.findAll();
-        List<ProductDetails> sortByCartId = new ArrayList<>();
+        List<BasketInfo> list = basketInfoRepo.findAll();
 
-        for(ProductDetails item: cartProductsAll){
-            if(item.getCart_id().equals(basketId)){
-                sortByCartId.add(item);
-            }
-        }
+        for (BasketInfo item : list){
+            if(item.getId().equals(basketId)){
+                if(item.getStatus() == 1){
 
-        for(ProductDetails s: sortByCartId){
-            if(s.getProduct_id().equals(productId)){
+                    List<ProductDetails> cartProductsAll = productDetailsRepo.findAll();
+                    List<ProductDetails> sortByCartId = new ArrayList<>();
 
-                ProductDetails updatedProduct = new ProductDetails();
-                updatedProduct.setProduct_id(s.getProduct_id());
-                updatedProduct.setProduct_quantity(product.getProduct_quantity());
-                updatedProduct.setCart_id(s.getCart_id());
+                    for(ProductDetails s: cartProductsAll){
+                        if(s.getCart_id().equals(basketId)){
+                            sortByCartId.add(s);
+                        }
+                    }
 
-                productDetailsRepo.delete(s);
-                productDetailsRepo.save(updatedProduct);
+                    for(ProductDetails s: sortByCartId){
+                        if(s.getProduct_id().equals(productId)){
 
+                            ProductDetails updatedProduct = new ProductDetails();
+                            updatedProduct.setProduct_id(s.getProduct_id());
+                            updatedProduct.setProduct_quantity(product.getProduct_quantity());
+                            updatedProduct.setCart_id(s.getCart_id());
+
+                            productDetailsRepo.delete(s);
+                            productDetailsRepo.save(updatedProduct);
+
+                        }else{
+                            //product not found in cart exception
+                        }
+                    }
+
+                }else{
+                    // Basket already submitted exception
+                }
             }else{
-                //product not found in cart exception
+                // basket id not found exception
             }
         }
 
