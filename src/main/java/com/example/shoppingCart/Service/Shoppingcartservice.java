@@ -88,28 +88,25 @@ public class Shoppingcartservice {
     public void addProductToBasket(Long basketId, ProductDetails details) throws InvalidCartIdException, AlreadySubmittedException, InvalidProductIdException {
         //calling stock api for product stock
         StockResponse stockResponse;
-        try {
+        Boolean flag;
 
-            stockResponse = restTemplate.getForObject("http://localhost:9090/stock/" + details.getProduct_id(), StockResponse.class);
-        }
-        catch (Exception e) {
+        stockResponse = restTemplate.getForObject("http://localhost:9090/stock/7017", StockResponse.class);
 
-//            APIError error = restTemplate.getForObject("http://localhost:9090/stock/" + details.getProduct_id(),APIError.class);
+        if(stockResponse == null){
             throw new InvalidProductIdException();
-         }
+        }
 
-
-//        long quantity =  stockResponse.getData().get(0).getAttributes().getQuantity();
-
-
-
+        Long quantity =  stockResponse.getData().get(0).getAttributes().getQuantity();
+        System.out.println(quantity);
 
         List<BasketInfo> list = basketInfoRepo.findAll();
-        Boolean flag = false;
+        flag = false;
 
         for (BasketInfo item : list) {
 
             if (item.getId().equals(basketId)) {
+
+                flag = true;
 
                 if (item.getStatus() == 1) {
 
@@ -117,20 +114,18 @@ public class Shoppingcartservice {
                     productDetails.setProduct_id(details.getProduct_id());
                     productDetails.setProduct_quantity(details.getProduct_quantity());
                     productDetails.setCart_id(basketId);
-                    flag = true;
                     productDetailsRepo.save(productDetails);
                     break;
 
                 } else {
                     throw new AlreadySubmittedException();
                 }
-
+            }
 
         }
 
         if (!flag)
             throw new InvalidCartIdException();
-    }
 
     }
 
