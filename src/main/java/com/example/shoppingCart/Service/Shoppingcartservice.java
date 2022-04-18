@@ -3,23 +3,34 @@ package com.example.shoppingCart.Service;
 import com.example.shoppingCart.ExceptionHandling.*;
 import com.example.shoppingCart.Models.Database.BasketInfo;
 import com.example.shoppingCart.Models.Database.ProductDetails;
+import com.example.shoppingCart.Models.ExceptionModel.APIError;
 import com.example.shoppingCart.Models.RequestModel.Customer;
 import com.example.shoppingCart.Models.ResponseModels.BasketInfoResponse;
 import com.example.shoppingCart.Models.ResponseModels.Relationship.BasketInfoResponseWithRelationship;
 import com.example.shoppingCart.Models.ResponseModels.EmptyBasket;
 import com.example.shoppingCart.Models.ResponseModels.Relationship.CustomerShell;
 import com.example.shoppingCart.Models.ResponseModels.nProducts;
+import com.example.shoppingCart.StockModels.StockResponse;
 import com.example.shoppingCart.repo.BasketInfoRepo;
 import com.example.shoppingCart.repo.ProductDetailsRepo;
 import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class Shoppingcartservice {
+
+
+    Logger logger = LoggerFactory.getLogger(Shoppingcartservice.class);
+    //changes
+    @Autowired
+    RestTemplate restTemplate;
 
     @Autowired
     BasketInfoRepo basketInfoRepo;
@@ -41,7 +52,7 @@ public class Shoppingcartservice {
 
     }
 
-    public List<BasketInfoResponse> getBasketItemsById(Integer basketId) throws InvalidCartIdException {
+    public List<BasketInfoResponse> getBasketItemsById(Long basketId) throws InvalidCartIdException {
 
         List<BasketInfo> list = basketInfoRepo.findAll();
 
@@ -74,16 +85,33 @@ public class Shoppingcartservice {
         }
     }
 
-    public void addProductToBasket(Integer basketId, ProductDetails details) throws InvalidCartIdException, AlreadySubmittedException {
+    public void addProductToBasket(Long basketId, ProductDetails details) throws InvalidCartIdException, AlreadySubmittedException, InvalidProductIdException {
+        //calling stock api for product stock
+        StockResponse stockResponse;
+        try {
+
+            stockResponse = restTemplate.getForObject("http://localhost:9090/stock/" + details.getProduct_id(), StockResponse.class);
+        }
+        catch (Exception e) {
+
+//            APIError error = restTemplate.getForObject("http://localhost:9090/stock/" + details.getProduct_id(),APIError.class);
+            throw new InvalidProductIdException();
+         }
+
+
+//        long quantity =  stockResponse.getData().get(0).getAttributes().getQuantity();
+
+
+
 
         List<BasketInfo> list = basketInfoRepo.findAll();
         Boolean flag = false;
 
-        for (BasketInfo item : list){
+        for (BasketInfo item : list) {
 
-            if(item.getId().equals(basketId)){
+            if (item.getId().equals(basketId)) {
 
-                if(item.getStatus() == 1){
+                if (item.getStatus() == 1) {
 
                     ProductDetails productDetails = new ProductDetails();
                     productDetails.setProduct_id(details.getProduct_id());
@@ -93,19 +121,20 @@ public class Shoppingcartservice {
                     productDetailsRepo.save(productDetails);
                     break;
 
-                }else{
+                } else {
                     throw new AlreadySubmittedException();
                 }
 
-            }
+
         }
 
-        if(!flag)
+        if (!flag)
             throw new InvalidCartIdException();
+    }
 
     }
 
-    public void updateQuantity(Integer basketId, ProductDetails product) throws InvalidCartIdException, InvalidProductIdException, AlreadySubmittedException {
+    public void updateQuantity(Long basketId, ProductDetails product) throws InvalidCartIdException, InvalidProductIdException, AlreadySubmittedException {
 
         List<BasketInfo> list = basketInfoRepo.findAll();
         Boolean flagBasket = false;
@@ -157,7 +186,7 @@ public class Shoppingcartservice {
 
     }
 
-    public void associateBasketWithCustomer(Integer basketId, Customer customer) throws InvalidCartIdException, CustomerAlreadyAssocException, AlreadySubmittedException {
+    public void associateBasketWithCustomer(Long basketId, Customer customer) throws InvalidCartIdException, CustomerAlreadyAssocException, AlreadySubmittedException {
 
         List<BasketInfo> list = basketInfoRepo.findAll();
         List<BasketInfoResponse> output = new ArrayList<>();
@@ -202,8 +231,9 @@ public class Shoppingcartservice {
 
     }
 
-    public List<BasketInfoResponseWithRelationship> submitBasket(Integer basketId) throws AlreadySubmittedException, InvalidCartIdException, CustomerNotAssocException {
+    public List<BasketInfoResponseWithRelationship> submitBasket(Long basketId) throws AlreadySubmittedException, InvalidCartIdException, CustomerNotAssocException {
 
+       //calling Stock api to change stock of product
         List<BasketInfo> list = basketInfoRepo.findAll();
 
         List<BasketInfoResponseWithRelationship> output = new ArrayList<>();
@@ -213,6 +243,8 @@ public class Shoppingcartservice {
 
         for (BasketInfo item : list){
             if(item.getId().equals(basketId)){
+
+                flag=true;
 
                 if(item.getCustomerId() != null){
 
@@ -241,7 +273,6 @@ public class Shoppingcartservice {
                         basketInfoRepo.save(item);
 
                         output.add(response);
-                        flag = true;
                         break;
 
                     }else{

@@ -19,7 +19,7 @@ import javax.persistence.Id;
 public class BasketInfoResponse {
 
     @JsonProperty("id")
-    private Integer id = null;
+    private Long id = null;
 
     public enum TypeEnum {
         BASKET("basket");

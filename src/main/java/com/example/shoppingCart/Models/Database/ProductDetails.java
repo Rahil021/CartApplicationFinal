@@ -19,11 +19,11 @@ import javax.persistence.Table;
 public class ProductDetails {
 
     @JsonIgnore
-    public Integer cart_id;
+    public Long cart_id;
 
     @Id
     @Column(name = "product_id")
-    public Integer product_id;
+    public Long product_id;
 
     @Column(name = "quantity")
     public Integer product_quantity;

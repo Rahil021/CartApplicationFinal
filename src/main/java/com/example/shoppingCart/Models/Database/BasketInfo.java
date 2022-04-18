@@ -23,7 +23,7 @@ public class BasketInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("id")
-    private Integer id = null;
+    private Long id = null;
 
     public enum TypeEnum {
         BASKET("basket");

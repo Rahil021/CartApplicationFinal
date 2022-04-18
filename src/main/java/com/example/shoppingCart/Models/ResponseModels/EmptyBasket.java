@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EmptyBasket {
 
-    private Integer id;
+    private Long id;
     private String type;
 }
