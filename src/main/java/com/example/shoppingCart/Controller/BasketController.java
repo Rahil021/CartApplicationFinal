@@ -25,13 +25,13 @@ public class BasketController {
     Shoppingcartservice shoppingcartservice;
 
     // creates a new empty basket
-    @PostMapping("/basket")
+    @PostMapping(path = "/basket", produces = "application/vnd.api+json")
     public EmptyBasket createBasket(){
         return shoppingcartservice.createBasket();
     }
 
     // Get items from basket by id
-    @GetMapping("/basket/{basketId}")
+    @GetMapping(path = "/basket/{basketId}", produces = "application/vnd.api+json", consumes = "application/vnd.api+json")
     public BasketData getBasketItemsById(@PathVariable Long basketId) throws InvalidCartIdException {
 
         List<BasketInfoResponse> list = new ArrayList<>();
@@ -45,8 +45,8 @@ public class BasketController {
 
 
     //add product to basket
-    @PostMapping("/basket/{basketId}/product")
-    public BasketData addProductToBasket(@PathVariable Long basketId, @RequestBody ProductDetails productDetails) throws InvalidCartIdException, AlreadySubmittedException, InvalidProductIdException {
+    @PostMapping(path = "/basket/{basketId}/product",produces = "application/vnd.api+json",consumes = "application/vnd.api+json")
+    public BasketData addProductToBasket(@PathVariable Long basketId, @RequestBody ProductDetails productDetails) throws InvalidCartIdException, AlreadySubmittedException, InvalidProductIdException, NotEnoughProductsInStockException {
 
 
         shoppingcartservice.addProductToBasket(basketId,productDetails);
@@ -60,7 +60,7 @@ public class BasketController {
     }
 
     //update product quantity in basket
-    @PutMapping("/basket/{basketId}/product")
+    @PutMapping(path = "/basket/{basketId}/product", produces = "application/vnd.api+json",consumes = "application/vnd.api+json")
     public BasketData updateQuantity(@PathVariable Long basketId, @RequestBody ProductDetails product) throws InvalidCartIdException, InvalidProductIdException, AlreadySubmittedException {
 
         shoppingcartservice.updateQuantity(basketId,product);
@@ -75,7 +75,7 @@ public class BasketController {
     }
 
     //submit basket
-    @PostMapping("basket/submitBasket/{basketId}") //change to post
+    @PostMapping(path = "basket/submitBasket/{basketId}",produces = "application/vnd.api+json")
     public BasketDataForRelationShip submitBasket(@PathVariable Long basketId) throws AlreadySubmittedException, InvalidCartIdException, CustomerNotAssocException {
 
         //call stock update api and update stock_quantity
@@ -90,7 +90,7 @@ public class BasketController {
     }
 
     //Associate basket with customer
-    @PutMapping("basket/{basketId}/customer")
+    @PutMapping(path = "basket/{basketId}/customer",produces = "application/vnd.api+json" ,consumes = "application/vnd.api+json")
     public BasketData associateBasketWithCustomer(@PathVariable Long basketId, @RequestBody Customer customer) throws InvalidCartIdException, CustomerAlreadyAssocException, AlreadySubmittedException {
 
         shoppingcartservice.associateBasketWithCustomer(basketId,customer);
@@ -103,6 +103,8 @@ public class BasketController {
 
         return data;
     }
+
+
 //    @GetMapping("/quantity/{productid}")
 //    public StockResponse quantity(@PathVariable Long productid){
 //

@@ -4,6 +4,7 @@ import com.example.shoppingCart.ExceptionHandling.*;
 import com.example.shoppingCart.Models.Database.BasketInfo;
 import com.example.shoppingCart.Models.Database.ProductDetails;
 import com.example.shoppingCart.Models.ExceptionModel.APIError;
+import com.example.shoppingCart.Models.ExceptionModel.ErrorResponse;
 import com.example.shoppingCart.Models.RequestModel.Customer;
 import com.example.shoppingCart.Models.ResponseModels.BasketInfoResponse;
 import com.example.shoppingCart.Models.ResponseModels.Relationship.BasketInfoResponseWithRelationship;
@@ -17,11 +18,15 @@ import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class Shoppingcartservice {
@@ -85,16 +90,21 @@ public class Shoppingcartservice {
         }
     }
 
-    public void addProductToBasket(Long basketId, ProductDetails details) throws InvalidCartIdException, AlreadySubmittedException, InvalidProductIdException {
-        //calling stock api for product stock
+    public void addProductToBasket(Long basketId, ProductDetails details) throws InvalidCartIdException, AlreadySubmittedException, InvalidProductIdException, NotEnoughProductsInStockException {
         StockResponse stockResponse;
+        ErrorResponse error;
         Boolean flag;
 
-        stockResponse = restTemplate.getForObject("http://localhost:9090/stock/7017", StockResponse.class);
+        stockResponse = restTemplate.getForObject("http://localhost:9090/stock/p/"+details.getProduct_id(), StockResponse.class);
 
-        if(stockResponse == null){
-            throw new InvalidProductIdException();
-        }
+//        if(stockResponse == null){
+//            throw new InvalidProductIdException();
+//        }else{
+//            error = restTemplate.getForObject("http://localhost:9090/stock/p/"+details.getProduct_id(), ErrorResponse.class);
+//            if(Integer.parseInt(error.getData().getCode()) == 404){
+//                throw new InvalidProductIdException();
+//            }
+//        }
 
         Long quantity =  stockResponse.getData().get(0).getAttributes().getQuantity();
         System.out.println(quantity);
@@ -110,12 +120,18 @@ public class Shoppingcartservice {
 
                 if (item.getStatus() == 1) {
 
-                    ProductDetails productDetails = new ProductDetails();
-                    productDetails.setProduct_id(details.getProduct_id());
-                    productDetails.setProduct_quantity(details.getProduct_quantity());
-                    productDetails.setCart_id(basketId);
-                    productDetailsRepo.save(productDetails);
-                    break;
+                    if(details.getProduct_quantity() <= quantity){
+
+                        ProductDetails productDetails = new ProductDetails();
+                        productDetails.setProduct_id(details.getProduct_id());
+                        productDetails.setProduct_quantity(details.getProduct_quantity());
+                        productDetails.setCart_id(basketId);
+                        productDetailsRepo.save(productDetails);
+                        break;
+
+                    }else {
+                        throw new NotEnoughProductsInStockException();
+                    }
 
                 } else {
                     throw new AlreadySubmittedException();
@@ -287,6 +303,20 @@ public class Shoppingcartservice {
         else
             return output;
 
+
+    }
+
+    public ResponseEntity<Object> test(ProductDetails details){
+
+        APIError error;
+        Boolean flag;
+
+        StockResponse stockResponse = restTemplate.getForObject("http://localhost:9090/stock/p/"+details.getProduct_id(),StockResponse.class);
+
+        Long quantity =  stockResponse.getData().get(0).getAttributes().getQuantity();
+        System.out.println(quantity);
+
+        return null;
 
     }
 
