@@ -20,7 +20,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({InvalidCartIdException.class})
-    ResponseEntity<?> notValidExceptionHandler(Exception e, ServletWebRequest request){
+    ResponseEntity<?> InvalidCartIdException(Exception e, ServletWebRequest request){
         APIError apiError = new APIError();
         apiError.setStatus(HttpStatus.BAD_REQUEST);
         apiError.setCode("404");
@@ -47,6 +47,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({NotEnoughProductsInStockException.class})
     ResponseEntity<?> NotEnoughProductsInStockException(Exception e, ServletWebRequest request){
+
         APIError apiError = new APIError();
         apiError.setStatus(HttpStatus.BAD_REQUEST);
         apiError.setCode("400");
