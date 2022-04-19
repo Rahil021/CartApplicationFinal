@@ -39,7 +39,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         apiError.setCode("404");
         apiError.setTitle(e.getMessage());
         ErrorSource es = new ErrorSource();
-        es.setParameter("basketId");
+        es.setParameter("productId");
         es.setPointer("N/A");
         apiError.setSource(es);
         return new ResponseEntity(apiError, new HttpHeaders(), apiError.getStatus());

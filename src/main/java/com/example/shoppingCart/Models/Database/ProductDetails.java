@@ -26,6 +26,6 @@ public class ProductDetails {
     public Long product_id;
 
     @Column(name = "quantity")
-    public Integer product_quantity;
+    public Long product_quantity;
 
 }

@@ -6,6 +6,7 @@ import com.example.shoppingCart.Models.Database.ProductDetails;
 import com.example.shoppingCart.Models.ExceptionModel.APIError;
 import com.example.shoppingCart.Models.ExceptionModel.ErrorResponse;
 import com.example.shoppingCart.Models.RequestModel.Customer;
+import com.example.shoppingCart.Models.RequestModel.UpdateQuantity;
 import com.example.shoppingCart.Models.ResponseModels.BasketInfoResponse;
 import com.example.shoppingCart.Models.ResponseModels.Relationship.BasketInfoResponseWithRelationship;
 import com.example.shoppingCart.Models.ResponseModels.EmptyBasket;
@@ -14,6 +15,8 @@ import com.example.shoppingCart.Models.ResponseModels.nProducts;
 import com.example.shoppingCart.StockModels.StockResponse;
 import com.example.shoppingCart.repo.BasketInfoRepo;
 import com.example.shoppingCart.repo.ProductDetailsRepo;
+import com.fasterxml.jackson.core.JsonParser;
+import lombok.Builder;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +26,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import springfox.documentation.spring.web.json.JacksonModuleRegistrar;
+import springfox.documentation.spring.web.json.Json;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +36,6 @@ import java.util.Locale;
 @Service
 public class Shoppingcartservice {
 
-    Logger logger = LoggerFactory.getLogger(Shoppingcartservice.class);
-    //changes
     @Autowired
     RestTemplate restTemplate;
 
@@ -250,7 +253,7 @@ public class Shoppingcartservice {
 
     }
 
-    public List<BasketInfoResponseWithRelationship> submitBasket(Long basketId) throws AlreadySubmittedException, InvalidCartIdException, CustomerNotAssocException {
+    public List<BasketInfoResponseWithRelationship> submitBasket(Long basketId) throws AlreadySubmittedException, InvalidCartIdException, CustomerNotAssocException, InvalidProductIdException, NotEnoughProductsInStockException {
 
        //calling Stock api to change stock of product
         List<BasketInfo> list = basketInfoRepo.findAll();
@@ -272,7 +275,7 @@ public class Shoppingcartservice {
 
                     customerAssociated = true;
 
-                    if(item.getStatus() == 1){
+                    if(item.getStatus() == 1){  //change to 1
 
                         AllCOnditionSatisfied = true;
 
@@ -318,11 +321,39 @@ public class Shoppingcartservice {
 
     if(AllCOnditionSatisfied){
 
+        StockResponse stockResponse;
+
         for(ProductDetails qlist : productListForReducingQuantity){
             Long id = qlist.getProduct_id();
-            int quantity = qlist.getProduct_quantity();
+            Long quantity = qlist.getProduct_quantity();
 
             //add stock body and call restTemplate in try catch block
+
+            try{
+                stockResponse = restTemplate.getForObject("http://localhost:9090/stock/p/"+id, StockResponse.class);
+            }catch (HttpClientErrorException e){
+                throw new InvalidProductIdException();
+            }
+
+            Long dbQuantity = stockResponse.getData().get(0).getAttributes().getQuantity();
+
+            if(dbQuantity >= quantity){
+
+                UpdateQuantity updateQuantity = new UpdateQuantity();
+                updateQuantity.setProductId(String.valueOf(id));
+                updateQuantity.setQuantity(quantity);
+
+
+                try{
+                    restTemplate.put("http://localhost:9090/stock/removeStock/"+id,updateQuantity,StockResponse.class);
+                }catch (HttpClientErrorException e){
+
+                    throw new InvalidProductIdException();
+                }
+
+            }else {
+                throw new NotEnoughProductsInStockException();
+            }
 
         }
 
