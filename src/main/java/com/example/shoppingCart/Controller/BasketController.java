@@ -43,7 +43,6 @@ public class BasketController {
         return data;
     }
 
-
     //add product to basket
     @PostMapping(path = "/basket/{basketId}/product",produces = "application/vnd.api+json",consumes = "application/vnd.api+json")
     public BasketData addProductToBasket(@PathVariable Long basketId, @RequestBody ProductDetails productDetails) throws InvalidCartIdException, AlreadySubmittedException, InvalidProductIdException, NotEnoughProductsInStockException {
@@ -113,5 +112,6 @@ public class BasketController {
 //        long quantity =  stockResponse.getData().get(0).getAttributes().getQuantity();
 //        return stockResponse;
 //    }
+
 }
 

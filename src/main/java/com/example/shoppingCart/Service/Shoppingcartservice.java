@@ -31,7 +31,6 @@ import java.util.Locale;
 @Service
 public class Shoppingcartservice {
 
-
     Logger logger = LoggerFactory.getLogger(Shoppingcartservice.class);
     //changes
     @Autowired
@@ -92,22 +91,15 @@ public class Shoppingcartservice {
 
     public void addProductToBasket(Long basketId, ProductDetails details) throws InvalidCartIdException, AlreadySubmittedException, InvalidProductIdException, NotEnoughProductsInStockException {
         StockResponse stockResponse;
-        ErrorResponse error;
         Boolean flag;
 
-        stockResponse = restTemplate.getForObject("http://localhost:9090/stock/p/"+details.getProduct_id(), StockResponse.class);
-
-//        if(stockResponse == null){
-//            throw new InvalidProductIdException();
-//        }else{
-//            error = restTemplate.getForObject("http://localhost:9090/stock/p/"+details.getProduct_id(), ErrorResponse.class);
-//            if(Integer.parseInt(error.getData().getCode()) == 404){
-//                throw new InvalidProductIdException();
-//            }
-//        }
+        try{
+            stockResponse = restTemplate.getForObject("http://localhost:9090/stock/p/"+details.getProduct_id(), StockResponse.class);
+        }catch (HttpClientErrorException e){
+            throw new InvalidProductIdException();
+        }
 
         Long quantity =  stockResponse.getData().get(0).getAttributes().getQuantity();
-        System.out.println(quantity);
 
         List<BasketInfo> list = basketInfoRepo.findAll();
         flag = false;
@@ -145,11 +137,21 @@ public class Shoppingcartservice {
 
     }
 
-    public void updateQuantity(Long basketId, ProductDetails product) throws InvalidCartIdException, InvalidProductIdException, AlreadySubmittedException {
+    public void updateQuantity(Long basketId, ProductDetails product) throws InvalidCartIdException, InvalidProductIdException, AlreadySubmittedException, NotEnoughProductsInStockException {
 
         List<BasketInfo> list = basketInfoRepo.findAll();
         Boolean flagBasket = false;
         Boolean flagProduct = false;
+        StockResponse stockResponse;
+
+        try{
+            stockResponse = restTemplate.getForObject("http://localhost:9090/stock/p/"+product.getProduct_id(), StockResponse.class);
+        }catch (HttpClientErrorException e){
+            throw new InvalidProductIdException();
+        }
+
+        Long quantity =  stockResponse.getData().get(0).getAttributes().getQuantity();
+        System.out.println(quantity);
 
         for (BasketInfo item : list){
             if(item.getId().equals(basketId)){
@@ -158,29 +160,35 @@ public class Shoppingcartservice {
 
                 if(item.getStatus() == 1){
 
-                    List<ProductDetails> cartProductsAll = productDetailsRepo.findAll();
-                    List<ProductDetails> sortByCartId = new ArrayList<>();
+                    if(product.getProduct_quantity() <= quantity){
 
-                    for(ProductDetails s: cartProductsAll){
-                        if(s.getCart_id().equals(basketId)){
-                            sortByCartId.add(s);
+                        List<ProductDetails> cartProductsAll = productDetailsRepo.findAll();
+                        List<ProductDetails> sortByCartId = new ArrayList<>();
+
+                        for(ProductDetails s: cartProductsAll){
+                            if(s.getCart_id().equals(basketId)){
+                                sortByCartId.add(s);
+                            }
                         }
-                    }
 
-                    for(ProductDetails s: sortByCartId){
-                        if(s.getProduct_id().equals(product.getProduct_id())){
+                        for(ProductDetails s: sortByCartId){
+                            if(s.getProduct_id().equals(product.getProduct_id())){
 
-                            ProductDetails updatedProduct = new ProductDetails();
-                            updatedProduct.setProduct_id(s.getProduct_id());
-                            updatedProduct.setProduct_quantity(product.getProduct_quantity());
-                            updatedProduct.setCart_id(s.getCart_id());
+                                ProductDetails updatedProduct = new ProductDetails();
+                                updatedProduct.setProduct_id(s.getProduct_id());
+                                updatedProduct.setProduct_quantity(product.getProduct_quantity());
+                                updatedProduct.setCart_id(s.getCart_id());
 
-                            productDetailsRepo.delete(s);
-                            productDetailsRepo.save(updatedProduct);
+                                productDetailsRepo.delete(s);
+                                productDetailsRepo.save(updatedProduct);
 
-                            flagProduct = true;
+                                flagProduct = true;
 
+                            }
                         }
+
+                    }else {
+                        throw new NotEnoughProductsInStockException();
                     }
 
                 }else{
@@ -249,8 +257,11 @@ public class Shoppingcartservice {
 
         List<BasketInfoResponseWithRelationship> output = new ArrayList<>();
 
+        List<ProductDetails> productListForReducingQuantity  = new ArrayList<>();
+
         boolean flag = false;
         boolean customerAssociated = false;
+        boolean AllCOnditionSatisfied = false;
 
         for (BasketInfo item : list){
             if(item.getId().equals(basketId)){
@@ -263,12 +274,16 @@ public class Shoppingcartservice {
 
                     if(item.getStatus() == 1){
 
+                        AllCOnditionSatisfied = true;
+
                         BasketInfoResponseWithRelationship response = new BasketInfoResponseWithRelationship();
                         response.setId(item.getId());
                         response.setType(BasketInfoResponse.TypeEnum.BASKET);
 
                         nProducts products = new nProducts();
                         products.setProducts(item.getList());
+
+                        productListForReducingQuantity = item.getList();
 
                         response.setProducts(products);
 
@@ -296,27 +311,24 @@ public class Shoppingcartservice {
             }
         }
 
-        if(!flag)
-            throw new InvalidCartIdException();
-        else if (!customerAssociated)
-            throw new CustomerNotAssocException();
-        else
-            return output;
+    if(!flag)
+        throw new InvalidCartIdException();
+    else if (!customerAssociated)
+        throw new CustomerNotAssocException();
 
+    if(AllCOnditionSatisfied){
+
+        for(ProductDetails qlist : productListForReducingQuantity){
+            Long id = qlist.getProduct_id();
+            int quantity = qlist.getProduct_quantity();
+
+            //add stock body and call restTemplate in try catch block
+
+        }
 
     }
 
-    public ResponseEntity<Object> test(ProductDetails details){
-
-        APIError error;
-        Boolean flag;
-
-        StockResponse stockResponse = restTemplate.getForObject("http://localhost:9090/stock/p/"+details.getProduct_id(),StockResponse.class);
-
-        Long quantity =  stockResponse.getData().get(0).getAttributes().getQuantity();
-        System.out.println(quantity);
-
-        return null;
+        return output;
 
     }
 
